@@ -8,7 +8,8 @@ import (
 
 var (
 	// PGDumpCmd is the path to the `pg_dump` executable
-	PGDumpCmd = "pg_dump"
+	PGDumpCmd    = "pg_dump"
+	PGRestoreCmd = "pg_restore"
 )
 
 // Postgres is an `Exporter` interface that backs up a Postgres database via the `pg_dump` command
@@ -28,8 +29,8 @@ type Postgres struct {
 
 // Export produces a `pg_dump` of the specified database, and creates a gzip compressed tarball archive.
 func (x Postgres) Export() *ExportResult {
-	result := &ExportResult{MIME: "application/x-tar"}
-	result.Path = fmt.Sprintf(`bu_%v_%v.sql.tar.gz`, x.DB, time.Now().Unix())
+	result := &ExportResult{MIME: "application/gzip"}
+	result.Path = fmt.Sprintf(`bu_%v_%v.sql.gz`, x.DB, time.Now().Unix())
 	options := append(x.dumpOptions(), "-Fc", fmt.Sprintf(`-f%v`, result.Path))
 	out, err := exec.Command(PGDumpCmd, options...).Output()
 	if err != nil {
@@ -38,23 +39,33 @@ func (x Postgres) Export() *ExportResult {
 	return result
 }
 
+func (x Postgres) Import(filepath string) error {
+	options := x.dumpOptions()
+	command := fmt.Sprintf("gunzip < %s | %s %s", filepath, PGRestoreCmd, x.DB)
+	_, err := exec.Command(command, options...).Output()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (x Postgres) dumpOptions() []string {
 	options := x.Options
 
 	if x.DB != "" {
-		options = append(options, fmt.Sprintf(`-d%v`, x.DB))
+		options = append(options, fmt.Sprintf(`-d %v`, x.DB))
 	}
 
 	if x.Host != "" {
-		options = append(options, fmt.Sprintf(`-h%v`, x.Host))
+		options = append(options, fmt.Sprintf(`-h %v`, x.Host))
 	}
 
 	if x.Port != "" {
-		options = append(options, fmt.Sprintf(`-p%v`, x.Port))
+		options = append(options, fmt.Sprintf(`-p %v`, x.Port))
 	}
 
 	if x.Username != "" {
-		options = append(options, fmt.Sprintf(`-U%v`, x.Username))
+		options = append(options, fmt.Sprintf(`-U %v`, x.Username))
 	}
 
 	return options
