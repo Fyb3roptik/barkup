@@ -8,8 +8,8 @@ import (
 
 var (
 	// PGDumpCmd is the path to the `pg_dump` executable
-	PGDumpCmd    = "pg_dump"
-	PGRestoreCmd = "pg_restore"
+	PGDumpCmd    = "/bin/pg_dump"
+	PGRestoreCmd = "/bin/pg_restore"
 )
 
 // Postgres is an `Exporter` interface that backs up a Postgres database via the `pg_dump` command
