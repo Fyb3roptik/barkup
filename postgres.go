@@ -21,6 +21,8 @@ type Postgres struct {
 	DB string
 	// Connection Username
 	Username string
+	// Filename of the file to save
+	Filename string
 	// Extra pg_dump options
 	// e.g []string{"--inserts"}
 	Options []string

@@ -46,8 +46,6 @@ type Storer interface {
 type ExportResult struct {
 	// Path to exported file
 	Path string
-	// Filename of the file to save
-	Filename string
 	// MIME type of the exported file (e.g. application/x-tar)
 	MIME string
 	// Any error that occured during `Export()`
