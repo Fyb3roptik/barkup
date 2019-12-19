@@ -33,7 +33,7 @@ func (x Postgres) Export() *ExportResult {
 	result := &ExportResult{MIME: "application/gzip"}
 	result.Path = fmt.Sprintf(x.Filename)
 	options := x.dumpOptions()
-	command := fmt.Sprintf("sudo -u postgres pg_dump %s | gzip -9 > %s", x.DB, PGRestoreCmd, result.Path)
+	command := fmt.Sprintf("sudo -u postgres %s %s | gzip -9 > %s", PGDumpCmd, x.DB, result.Path)
 	out, err := exec.Command(command, options...).Output()
 	if err != nil {
 		result.Error = makeErr(err, string(out))
