@@ -2,6 +2,7 @@ package barkup
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 )
 
@@ -33,11 +34,24 @@ func (x Postgres) Export() *ExportResult {
 	result := &ExportResult{MIME: "application/gzip"}
 	result.Path = fmt.Sprintf(x.Filename)
 	options := x.dumpOptions()
-	command := fmt.Sprintf("%s %s | gzip -9 > %s", PGDumpCmd, x.DB, result.Path)
+	// command := fmt.Sprintf("%s %s | gzip -9 > %s", PGDumpCmd, x.DB, result.Path)
+
+	command := fmt.Sprintf("%s %s", PGDumpCmd, x.DB)
 	out, err := exec.Command(command, options...).Output()
 	if err != nil {
 		result.Error = makeErr(err, string(out))
+		return result
 	}
+
+	result.Path = x.Filename
+	command = fmt.Sprintf("%s -9 > %s", GzipCmd, result.Path)
+	_, err = exec.Command(command).Output()
+	if err != nil {
+		result.Error = makeErr(err, string(out))
+		return result
+	}
+	os.Remove(x.Filename)
+
 	return result
 }
 
