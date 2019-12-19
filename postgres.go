@@ -27,9 +27,9 @@ type Postgres struct {
 }
 
 // Export produces a `pg_dump` of the specified database, and creates a gzip compressed tarball archive.
-func (x Postgres) Export(filepath string) *ExportResult {
+func (x Postgres) Export(filename string) *ExportResult {
 	result := &ExportResult{MIME: "application/gzip"}
-	result.Path = fmt.Sprintf(filepath)
+	result.Path = fmt.Sprintf(filename)
 	options := append(x.dumpOptions(), "-Fc", fmt.Sprintf(`-f%v`, result.Path))
 	out, err := exec.Command(PGDumpCmd, options...).Output()
 	if err != nil {
@@ -38,9 +38,9 @@ func (x Postgres) Export(filepath string) *ExportResult {
 	return result
 }
 
-func (x Postgres) Import(filepath string) error {
+func (x Postgres) Import(filename string) error {
 	options := x.dumpOptions()
-	command := fmt.Sprintf("gunzip < %s | %s %s", filepath, PGRestoreCmd, x.DB)
+	command := fmt.Sprintf("gunzip < %s | %s %s", filename, PGRestoreCmd, x.DB)
 	_, err := exec.Command(command, options...).Output()
 	if err != nil {
 		return err
