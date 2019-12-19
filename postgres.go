@@ -32,8 +32,9 @@ type Postgres struct {
 func (x Postgres) Export() *ExportResult {
 	result := &ExportResult{MIME: "application/gzip"}
 	result.Path = fmt.Sprintf(x.Filename)
-	options := append(x.dumpOptions(), "-Fc", fmt.Sprintf(`-f%v`, result.Path))
-	out, err := exec.Command(PGDumpCmd, options...).Output()
+	options := x.dumpOptions()
+	command := fmt.Sprintf("sudo -u postgres pg_dump %s | gzip -9 > %s", x.DB, PGRestoreCmd, result.Path)
+	out, err := exec.Command(command, options...).Output()
 	if err != nil {
 		result.Error = makeErr(err, string(out))
 	}
