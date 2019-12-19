@@ -3,7 +3,6 @@ package barkup
 import (
 	"fmt"
 	"os/exec"
-	"time"
 )
 
 var (
@@ -28,9 +27,9 @@ type Postgres struct {
 }
 
 // Export produces a `pg_dump` of the specified database, and creates a gzip compressed tarball archive.
-func (x Postgres) Export() *ExportResult {
+func (x Postgres) Export(filepath string) *ExportResult {
 	result := &ExportResult{MIME: "application/gzip"}
-	result.Path = fmt.Sprintf(`bu_%v_%v.sql.gz`, x.DB, time.Now().Unix())
+	result.Path = fmt.Sprintf(filepath)
 	options := append(x.dumpOptions(), "-Fc", fmt.Sprintf(`-f%v`, result.Path))
 	out, err := exec.Command(PGDumpCmd, options...).Output()
 	if err != nil {
