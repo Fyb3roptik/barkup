@@ -8,8 +8,8 @@ import (
 
 var (
 	// PGDumpCmd is the path to the `pg_dump` executable
-	PGDumpCmd    = "/bin/pg_dump"
-	PGRestoreCmd = "/bin/pg_restore"
+	PGDumpCmd    = "pg_dump"
+	PGRestoreCmd = "pg_restore"
 )
 
 // Postgres is an `Exporter` interface that backs up a Postgres database via the `pg_dump` command
@@ -33,11 +33,11 @@ type Postgres struct {
 func (x Postgres) Export() *ExportResult {
 	result := &ExportResult{MIME: "application/gzip"}
 	result.Path = fmt.Sprintf(x.Filename)
-	options := x.dumpOptions()
+	// options := x.dumpOptions()
 	// command := fmt.Sprintf("%s %s | gzip -9 > %s", PGDumpCmd, x.DB, result.Path)
 
-	command := fmt.Sprintf("%s %s", PGDumpCmd, x.DB)
-	out, err := exec.Command(command, options...).Output()
+	command := fmt.Sprintf("%s -Fc -U %s %s", PGDumpCmd, x.Username, x.DB)
+	out, err := exec.Command(command).Output()
 	if err != nil {
 		result.Error = makeErr(err, string(out))
 		return result
