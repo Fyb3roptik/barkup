@@ -33,19 +33,14 @@ type Postgres struct {
 func (x Postgres) Export() *ExportResult {
 	result := &ExportResult{MIME: "application/gzip"}
 	result.Path = fmt.Sprintf(x.Filename)
-	// options := x.dumpOptions()
-	// command := fmt.Sprintf("%s %s | gzip -9 > %s", PGDumpCmd, x.DB, result.Path)
-
-	command := fmt.Sprintf("%s -Fc -U %s %s", PGDumpCmd, x.Username, x.DB)
-	out, err := exec.Command(command).Output()
+	out, err := exec.Command(PGDumpCmd, "-Fc", "-U", x.Username, x.DB).Output()
 	if err != nil {
 		result.Error = makeErr(err, string(out))
 		return result
 	}
 
 	result.Path = x.Filename
-	command = fmt.Sprintf("%s -9 > %s", GzipCmd, result.Path)
-	_, err = exec.Command(command).Output()
+	_, err = exec.Command(GzipCmd, "-9", ">", result.Path).Output()
 	if err != nil {
 		result.Error = makeErr(err, string(out))
 		return result
